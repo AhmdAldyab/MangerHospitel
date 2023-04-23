@@ -15,4 +15,8 @@ class Doctor extends Model
     {
         return $this->belongsTo(specialization::class, 'Specialization_id');
     }
+    public function images()
+    {
+        return $this->morphMany('App\Models\Image', 'imageable');
+    }
 }

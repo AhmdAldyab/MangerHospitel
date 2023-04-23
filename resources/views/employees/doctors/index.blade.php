@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('css')
-@toastr_css
+    @toastr_css
 @section('title')
     List Doctors
 @stop
@@ -39,7 +39,7 @@
         <div class="card card-statistics h-100">
             <div class="card-body">
                 {{-- table list doctors --}}
-                <a href="" class="btn btn-success btn-sm" >Add Doctor</a>
+                <a href="{{ route('Doctor.create') }}" class="btn btn-success btn-sm">Add Doctor</a>
                 <br><br>
                 <div class="table-responsive">
                     <table id="datatable" class="table table-hover table-sm table-bordered p-0" data-page-length="50"
@@ -52,6 +52,8 @@
                                 <th>Date of birth</th>
                                 <th>Specialization</th>
                                 <th>Gender</th>
+                                <th>Number Phone</th>
+                                <th>Email</th>
                                 <th>Adress</th>
                                 <th>Proccess</th>
                             </tr>
@@ -65,16 +67,59 @@
                                     <td>{{ $doctor->birth_date }}</td>
                                     <td>{{ $doctor->specializtion->name }}</td>
                                     <td>{{ $doctor->gender->name }}</td>
+                                    <td>{{ $doctor->number_phone }}</td>
+                                    <td>{{ $doctor->email }}</td>
+                                    <td>{{ $doctor->adress }}</td>
                                     <td>
                                         {{-- Edit Section --}}
-                                        <a href="#" class="btn btn-info btn-sm"
-                                        title="edit section"><i class="fa fa-edit"></i></a>
+                                        <a href="{{ route('Doctor.edit', $doctor->id) }}" class="btn btn-info btn-sm"
+                                            title="edit section"><i class="fa fa-edit"></i></a>
                                         {{-- Delete Section --}}
-                                        <a href="#" class="btn btn-danger btn-sm"
-                                        title="delete section">
-                                        <i class="fa fa-trash"></i></a>
+                                        <a href="#" class="btn btn-danger btn-sm" title="delete section"
+                                            data-toggle="modal" data-target="#delete-doctor{{ $doctor->id }}">
+                                            <i class="fa fa-trash"></i></a>
                                     </td>
                                 </tr>
+                                {{-- Start delete doctor --}}
+                                <div class="modal fade" id="delete-doctor{{ $doctor->id }}" tabindex="-1"
+                                    role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 style="font-family: 'Cairo', sans-serif;" class="modal-title"
+                                                    id="exampleModalLabel">
+                                                    Delete {{ $doctor->name }}
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                    aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <!-- delete_form -->
+                                            <form action="{{ route('Doctor.destroy', 'test') }}" method="POST">
+                                                @method('delete')
+                                                @csrf
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="id" value="{{ $doctor->id }}">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <input id="Name" type="text" name="Name" readonly
+                                                                value="Are you sure to delete" class="form-control"
+                                                                required>
+                                                        </div>
+                                                    </div>
+                                                    <br><br>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{-- End delete doctor --}}
                             @endforeach
                         </tbody>
                     </table>

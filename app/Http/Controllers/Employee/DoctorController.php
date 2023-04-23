@@ -4,7 +4,13 @@ namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
+use App\Models\Gender;
+use App\Models\Image;
+use App\Models\specialization;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreRequestDoctor;
+use Illuminate\Support\Facades\Storage;
 
 class DoctorController extends Controller
 {
@@ -26,7 +32,9 @@ class DoctorController extends Controller
      */
     public function create()
     {
-        //
+        $genders=Gender::all();
+        $specializations=specialization::all();
+        return view('employees.doctors.create',compact('genders','specializations'));
     }
 
     /**
@@ -35,9 +43,41 @@ class DoctorController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreRequestDoctor $request)
     {
-        //
+        try {
+            DB::beginTransaction();
+            
+            $docter=Doctor::create([
+                'name'       => $request->name,
+                'hiring_date' => $request->hiring,
+                'birth_date' => $request->birth,
+                'gender_id'       => $request->gender,
+                'Specialization_id'       => $request->specialization,
+                'adress'       => $request->adress,
+                'email'       => $request->email,
+                'number_phone'       => $request->number,
+            ]);
+            if ($request->hasfile('photes')) {
+                foreach ($request->file('photes') as $file) {
+                    $name=$file->getClientOriginalName();
+                    $file->storeAs('attachments/doctorss/' . $docter->name, $file->getClientOriginalName(), 'upload_attachments');
+                    Image::create([
+                        'filename' =>$name,
+                        'imageable_id'=>$docter->id,
+                        'imageable_type'=>'App\Models\Doctor',
+                    ]);
+                }
+            }
+            DB::commit();
+            toastr()->success('Data has been saved successfully!', 'Congrats');
+            return redirect()->back();   
+        } catch (\Throwable $th) {
+            DB::rollback();
+            toastr()->error('Oops! Something went wrong!');
+            return redirect()->back();
+        }
+    
     }
 
     /**
@@ -57,9 +97,12 @@ class DoctorController extends Controller
      * @param  \App\Models\Doctor  $doctor
      * @return \Illuminate\Http\Response
      */
-    public function edit(Doctor $doctor)
+    public function edit($id)
     {
-        //
+        $doctor=Doctor::findOrFail($id);
+        $genders=Gender::all();
+        $specializations=specialization::all();
+        return view('employees.doctors.edit',compact('doctor','genders','specializations'));
     }
 
     /**
@@ -69,9 +112,40 @@ class DoctorController extends Controller
      * @param  \App\Models\Doctor  $doctor
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Doctor $doctor)
+    public function update(StoreRequestDoctor $request)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $doctor=Doctor::findOrFail($request->id);
+            $doctor->update([
+                'name'       => $request->name,
+                'hiring_date' => $request->hiring,
+                'birth_date' => $request->birth,
+                'gender_id'       => $request->gender,
+                'Specialization_id'       => $request->specialization,
+                'adress'       => $request->adress,
+                'email'       => $request->email,
+                'number_phone'       => $request->number,
+            ]);
+            if ($request->hasfile('photes')) {
+                foreach ($request->file('photes') as $file) {
+                    $name=$file->getClientOriginalName();
+                    $file->storeAs('attachments/doctorss/' . $docter->name, $file->getClientOriginalName(), 'upload_attachments');
+                    Image::create([
+                        'filename' =>$name,
+                        'imageable_id'=>$docter->id,
+                        'imageable_type'=>'App\Models\Doctor',
+                    ]);
+                }
+            }
+            DB::commit();
+            toastr()->success('Data has been saved successfully!', 'Congrats');
+            return redirect()->back();   
+        } catch (\Throwable $th) {
+            DB::rollback();
+            toastr()->error('Oops! Something went wrong!');
+            return redirect()->back();
+        }
     }
 
     /**
@@ -80,8 +154,18 @@ class DoctorController extends Controller
      * @param  \App\Models\Doctor  $doctor
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Doctor $doctor)
+    public function destroy(Request $request)
     {
-        //
+        
+            $doctor=Doctor::findOrFail($request->id);
+            $image=Image::where('imageable_id',$request->id);
+            if (!empty($image)) {
+                
+                Storage::disk('upload_attachments')->deleteDirectory('attachments/doctorss/'.$doctor->name);
+            }
+            Doctor::findOrFail($request->id)->delete();
+            toastr()->success('Data has been saved successfully!', 'Deleted');
+            return redirect()->back();
+        
     }
 }
