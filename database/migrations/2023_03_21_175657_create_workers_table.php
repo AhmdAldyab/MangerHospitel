@@ -15,7 +15,9 @@ class CreateWorkersTable extends Migration
     {
         Schema::create('workers', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name');     
+            $table->string('email');
+            $table->bigInteger('number_phone');
             $table->date('birth_date');
             $table->date('hiring_date');
             $table->bigInteger('gender_id')->unsigned();

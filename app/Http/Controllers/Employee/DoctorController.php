@@ -156,7 +156,7 @@ class DoctorController extends Controller
      */
     public function destroy(Request $request)
     {
-        
+        try {
             $doctor=Doctor::findOrFail($request->id);
             $image=Image::where('imageable_id',$request->id);
             if (!empty($image)) {
@@ -166,6 +166,10 @@ class DoctorController extends Controller
             Doctor::findOrFail($request->id)->delete();
             toastr()->success('Data has been saved successfully!', 'Deleted');
             return redirect()->back();
-        
+        } catch (\Throwable $th) {
+            DB::rollback();
+            toastr()->error('Oops! Something went wrong!');
+            return redirect()->back();
+        }
     }
 }
