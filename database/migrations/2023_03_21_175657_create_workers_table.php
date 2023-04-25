@@ -24,10 +24,6 @@ class CreateWorkersTable extends Migration
             $table->foreign('gender_id')->references('id')->on('genders')
 				->onDelete('cascade')
 				->onUpdate('cascade');
-            $table->bigInteger('Specialization_id')->unsigned();
-            $table->foreign('Specialization_id')->references('id')->on('specializations')
-				->onDelete('cascade')
-				->onUpdate('cascade');
             $table->string('adress');
             $table->timestamps();
         });
